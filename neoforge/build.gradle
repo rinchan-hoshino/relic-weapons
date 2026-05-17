@@ -44,8 +44,8 @@ neoForge {
         }
         configureEach {
             logLevel = org.slf4j.event.Level.INFO
-            systemProperty 'luminousGear.screenshot', System.getProperty('luminousGear.screenshot', 'false')
-            systemProperty 'luminousGear.screenshot.dir', System.getProperty('luminousGear.screenshot.dir', '')
+            systemProperty 'relicWeapons.screenshot', System.getProperty('relicWeapons.screenshot', 'false')
+            systemProperty 'relicWeapons.screenshot.dir', System.getProperty('relicWeapons.screenshot.dir', '')
         }
     }
 }

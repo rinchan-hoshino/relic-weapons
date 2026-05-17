@@ -1,10 +1,10 @@
-package dev.rinchan.luminousgear.recipe;
+package dev.rinchan.relicweapons.recipe;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.rinchan.luminousgear.LuminousGear;
-import dev.rinchan.luminousgear.registry.LuminousGearRegistries;
+import dev.rinchan.relicweapons.RelicWeapons;
+import dev.rinchan.relicweapons.registry.RelicWeaponsRegistries;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -22,8 +22,8 @@ public record GlowSmithingRecipe(Ingredient template, Ingredient addition, GlowM
         Ingredient.CODEC_NONEMPTY.fieldOf("template").forGetter(GlowSmithingRecipe::template),
         Ingredient.CODEC.optionalFieldOf("addition", Ingredient.EMPTY).forGetter(GlowSmithingRecipe::addition),
         Codec.STRING.optionalFieldOf("glow_type", GlowMode.ENCHANTMENT.id()).xmap(GlowMode::fromId, GlowMode::id).forGetter(GlowSmithingRecipe::mode),
-        Codec.INT.optionalFieldOf("color", LuminousGear.VANILLA_GLINT_COLOR).forGetter(GlowSmithingRecipe::color),
-        Codec.INT.optionalFieldOf("light_level", LuminousGear.DEFAULT_RADIANCE_LEVEL).forGetter(GlowSmithingRecipe::lightLevel)
+        Codec.INT.optionalFieldOf("color", RelicWeapons.VANILLA_GLINT_COLOR).forGetter(GlowSmithingRecipe::color),
+        Codec.INT.optionalFieldOf("light_level", RelicWeapons.DEFAULT_RADIANCE_LEVEL).forGetter(GlowSmithingRecipe::lightLevel)
     ).apply(instance, GlowSmithingRecipe::new));
 
     @Override
@@ -35,9 +35,9 @@ public record GlowSmithingRecipe(Ingredient template, Ingredient addition, GlowM
     public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
         ItemStack result = input.base().copyWithCount(1);
         if (mode == GlowMode.TEXTURE_LIGHT) {
-            LuminousGear.applyTextureLight(result, lightLevel);
+            RelicWeapons.applyTextureLight(result, lightLevel);
         } else {
-            LuminousGear.applyEnchantmentGlow(result, color);
+            RelicWeapons.applyEnchantmentGlow(result, color);
         }
         return result;
     }
@@ -46,9 +46,9 @@ public record GlowSmithingRecipe(Ingredient template, Ingredient addition, GlowM
     public ItemStack getResultItem(HolderLookup.Provider registries) {
         ItemStack stack = new ItemStack(Items.IRON_SWORD);
         if (mode == GlowMode.TEXTURE_LIGHT) {
-            LuminousGear.applyTextureLight(stack, lightLevel);
+            RelicWeapons.applyTextureLight(stack, lightLevel);
         } else {
-            LuminousGear.applyEnchantmentGlow(stack, color);
+            RelicWeapons.applyEnchantmentGlow(stack, color);
         }
         return stack;
     }
@@ -70,7 +70,7 @@ public record GlowSmithingRecipe(Ingredient template, Ingredient addition, GlowM
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return LuminousGearRegistries.GLOW_SMITHING.get();
+        return RelicWeaponsRegistries.GLOW_SMITHING.get();
     }
 
     @Override
@@ -84,8 +84,8 @@ public record GlowSmithingRecipe(Ingredient template, Ingredient addition, GlowM
 
     private boolean isValidBase(ItemStack stack) {
         return !stack.isEmpty()
-            && !stack.is(LuminousGearRegistries.ENCHANTMENT_GLOW.get())
-            && !stack.is(LuminousGearRegistries.TEXTURE_LIGHT.get());
+            && !stack.is(RelicWeaponsRegistries.ENCHANTMENT_GLOW.get())
+            && !stack.is(RelicWeaponsRegistries.TEXTURE_LIGHT.get());
     }
 
     public static final class Serializer implements RecipeSerializer<GlowSmithingRecipe> {

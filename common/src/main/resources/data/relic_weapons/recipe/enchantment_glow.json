@@ -1,0 +1,7 @@
+{
+  "type": "relic_weapons:glow_smithing",
+  "template": {
+    "item": "relic_weapons:enchantment_glow"
+  },
+  "glow_type": "enchantment"
+}

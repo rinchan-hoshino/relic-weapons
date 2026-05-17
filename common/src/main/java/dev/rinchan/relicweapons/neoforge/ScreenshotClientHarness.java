@@ -1,4 +1,4 @@
-package dev.rinchan.luminousgear.neoforge;
+package dev.rinchan.relicweapons.neoforge;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import java.io.File;
@@ -25,7 +25,7 @@ final class ScreenshotClientHarness {
     private ScreenshotClientHarness() {}
 
     public static void register() {
-        directory = new File(System.getProperty("luminousGear.screenshot.dir", "screenshots"));
+        directory = new File(System.getProperty("relicWeapons.screenshot.dir", "screenshots"));
         directory.mkdirs();
         NeoForge.EVENT_BUS.addListener(ScreenshotClientHarness::onClientTick);
     }
@@ -42,7 +42,7 @@ final class ScreenshotClientHarness {
                 minecraft.screen,
                 minecraft,
                 ServerAddress.parseString("localhost"),
-                new ServerData("Luminous Gear Screenshot", "localhost", ServerData.Type.OTHER),
+                new ServerData("Relic Weapons Screenshot", "localhost", ServerData.Type.OTHER),
                 false,
                 null
             );
@@ -54,7 +54,7 @@ final class ScreenshotClientHarness {
         minecraft.options.tutorialStep = TutorialSteps.NONE;
         minecraft.options.hideGui = false;
         minecraft.options.pauseOnLostFocus = false;
-        minecraft.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+        minecraft.options.setCameraType(CameraType.FIRST_PERSON);
         minecraft.gui.getChat().clearMessages(false);
         minecraft.getToasts().clear();
         minecraft.player.setYRot(35.0F);
@@ -62,14 +62,14 @@ final class ScreenshotClientHarness {
         minecraft.player.getInventory().selected = 0;
 
         if (!firstCaptured && inWorldTicks >= 180) {
-            save(minecraft, "luminous-gear-held-items.png");
+            save(minecraft, "relic-weapons-held-items.png");
             firstCaptured = true;
         }
         if (!secondCaptured && inWorldTicks >= 220) {
             minecraft.setScreen(new InventoryScreen(minecraft.player));
         }
         if (!secondCaptured && inWorldTicks >= 260) {
-            save(minecraft, "luminous-gear-inventory.png");
+            save(minecraft, "relic-weapons-inventory.png");
             secondCaptured = true;
         }
         if ((secondCaptured && inWorldTicks >= 300) || inWorldTicks >= 700) {

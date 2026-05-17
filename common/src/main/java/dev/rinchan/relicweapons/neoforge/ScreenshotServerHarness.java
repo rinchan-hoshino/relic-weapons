@@ -1,12 +1,13 @@
-package dev.rinchan.luminousgear.neoforge;
+package dev.rinchan.relicweapons.neoforge;
 
-import dev.rinchan.luminousgear.LuminousGear;
-import dev.rinchan.luminousgear.registry.LuminousGearRegistries;
+import dev.rinchan.relicweapons.RelicWeapons;
+import dev.rinchan.relicweapons.registry.RelicWeaponsRegistries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.NeoForge;
@@ -24,10 +25,18 @@ final class ScreenshotServerHarness {
 
     private static void onServerTick(ServerTickEvent.Post event) {
         ticks++;
-        if (prepared || ticks < 80 || event.getServer().getPlayerList().getPlayers().isEmpty()) {
+        if (event.getServer().getPlayerList().getPlayers().isEmpty()) {
             return;
         }
         ServerPlayer player = event.getServer().getPlayerList().getPlayers().getFirst();
+        player.setGameMode(GameType.CREATIVE);
+        player.getAbilities().invulnerable = true;
+        player.onUpdateAbilities();
+        player.setHealth(player.getMaxHealth());
+        event.getServer().setDifficulty(Difficulty.PEACEFUL, true);
+        if (prepared || ticks < 20) {
+            return;
+        }
         ServerLevel level = player.serverLevel();
         level.setDayTime(14000);
         BlockPos base = BlockPos.containing(player.getX(), player.getY() - 1, player.getZ());
@@ -40,15 +49,16 @@ final class ScreenshotServerHarness {
         }
         level.setBlock(base.offset(1, 1, 0), Blocks.SMITHING_TABLE.defaultBlockState(), 3);
         ItemStack sword = new ItemStack(Items.DIAMOND_SWORD);
-        LuminousGear.applyEnchantmentGlow(sword, LuminousGear.VANILLA_GLINT_COLOR);
+        RelicWeapons.applyEnchantmentGlow(sword, RelicWeapons.VANILLA_GLINT_COLOR);
+        RelicWeapons.applyTextureLight(sword, RelicWeapons.DEFAULT_RADIANCE_LEVEL);
         ItemStack axe = new ItemStack(Items.DIAMOND_AXE);
-        LuminousGear.applyTextureLight(axe, LuminousGear.DEFAULT_RADIANCE_LEVEL);
-        player.setGameMode(GameType.SURVIVAL);
+        RelicWeapons.applyTextureLight(axe, RelicWeapons.DEFAULT_RADIANCE_LEVEL);
+        player.setGameMode(GameType.CREATIVE);
         player.getInventory().clearContent();
         player.getInventory().setItem(0, sword);
         player.getInventory().setItem(1, axe);
-        player.getInventory().setItem(2, new ItemStack(LuminousGearRegistries.ENCHANTMENT_GLOW.get(), 4));
-        player.getInventory().setItem(3, new ItemStack(LuminousGearRegistries.TEXTURE_LIGHT.get(), 4));
+        player.getInventory().setItem(2, new ItemStack(RelicWeaponsRegistries.ENCHANTMENT_GLOW.get(), 4));
+        player.getInventory().setItem(3, new ItemStack(RelicWeaponsRegistries.TEXTURE_LIGHT.get(), 4));
         player.setPos(base.getX() + 0.5, base.getY() + 1, base.getZ() + 0.5);
         player.setYRot(35.0F);
         player.setXRot(15.0F);

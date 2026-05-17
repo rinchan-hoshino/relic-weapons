@@ -1,7 +1,0 @@
-{
-  "type": "luminous_gear:glow_smithing",
-  "template": {
-    "item": "luminous_gear:enchantment_glow"
-  },
-  "glow_type": "enchantment"
-}

@@ -1,4 +1,4 @@
-package dev.rinchan.luminousgear.recipe;
+package dev.rinchan.relicweapons.recipe;
 
 public enum GlowMode {
     ENCHANTMENT("enchantment"),
