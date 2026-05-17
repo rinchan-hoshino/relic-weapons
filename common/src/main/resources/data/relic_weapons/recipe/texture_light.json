@@ -4,5 +4,5 @@
     "item": "relic_weapons:texture_light"
   },
   "glow_type": "texture_light",
-  "light_level": 12
+  "light_level": 2
 }
