@@ -5,7 +5,7 @@
 Relic Weapons adds two smithing materials:
 
 - **Enchantment Glow**: adds vanilla enchantment glint to the target item. The material item itself also glints.
-- **Texture Light**: marks the target item with a configurable radiance level, renders the held item surface at full brightness, and exposes the same level for dynamic-light integrations. The default recipe stores light level 2.
+- **Texture Light**: marks the target item with a configurable radiance level, renders the held item surface at full brightness, and exposes the same level for dynamic-light integrations. The default recipe stores light level 12.
 
 The mod uses custom smithing recipes that copy the base item, so pack authors can add more glow recipes through datapacks.
 
@@ -26,7 +26,7 @@ Put the glow material in the smithing template slot and any target item in the b
   "type": "relic_weapons:glow_smithing",
   "template": { "item": "relic_weapons:texture_light" },
   "glow_type": "texture_light",
-  "light_level": 2
+  "light_level": 12
 }
 ```
 
@@ -47,7 +47,7 @@ The vanilla default glint recipe omits `color`.
 
 ## Dynamic light and shader integration
 
-The Texture Light material is registered as a level-2 item light for Sodium Dynamic Lights. Relic Weapons also exposes the same radiance level through an item data component on crafted targets, renders held relic item surfaces at full brightness on the client, and includes a Sodium Dynamic Lights hook so held relic items can emit their configured light.
+The Texture Light material is registered as a level-12 item light for Sodium Dynamic Lights. Relic Weapons also exposes the same radiance level through an item data component on crafted targets, renders held relic item surfaces at full brightness on the client, and includes a Sodium Dynamic Lights hook so held relic items can emit their configured light.
 
 Vanilla Minecraft does not provide a general per-item surface-emissive material system for arbitrary existing item textures. Relic Weapons keeps the item texture unchanged, then adds a client render pass for visible held-item radiance and a data component for dynamic-light/shader integrations.
 

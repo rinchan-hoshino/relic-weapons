@@ -7,7 +7,7 @@ import net.minecraft.world.item.ItemStack;
 public final class RelicWeapons {
     public static final String MOD_ID = "relic_weapons";
     public static final int VANILLA_GLINT_COLOR = -1;
-    public static final int DEFAULT_RADIANCE_LEVEL = 2;
+    public static final int DEFAULT_RADIANCE_LEVEL = 12;
 
     private RelicWeapons() {
     }
