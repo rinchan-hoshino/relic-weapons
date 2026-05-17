@@ -18,8 +18,11 @@ final class ScreenshotClientHarness {
     private static int clientTicks;
     private static int inWorldTicks;
     private static boolean connecting;
-    private static boolean firstCaptured;
-    private static boolean secondCaptured;
+    private static boolean textureLightSelected;
+    private static boolean glintSequenceCaptured;
+    private static boolean textureLightCaptured;
+    private static boolean inventoryOpened;
+    private static boolean inventoryCaptured;
     private static File directory;
 
     private ScreenshotClientHarness() {}
@@ -59,20 +62,37 @@ final class ScreenshotClientHarness {
         minecraft.getToasts().clear();
         minecraft.player.setYRot(35.0F);
         minecraft.player.setXRot(18.0F);
-        minecraft.player.getInventory().selected = 0;
 
-        if (!firstCaptured && inWorldTicks >= 180) {
-            save(minecraft, "relic-weapons-held-items.png");
-            firstCaptured = true;
+        if (!glintSequenceCaptured && inWorldTicks >= 180) {
+            minecraft.player.getInventory().selected = 0;
+            save(minecraft, "relic-weapons-enchantment-glint-01.png");
         }
-        if (!secondCaptured && inWorldTicks >= 220) {
+        if (!glintSequenceCaptured && inWorldTicks >= 205) {
+            minecraft.player.getInventory().selected = 0;
+            save(minecraft, "relic-weapons-enchantment-glint-02.png");
+        }
+        if (!glintSequenceCaptured && inWorldTicks >= 230) {
+            minecraft.player.getInventory().selected = 0;
+            save(minecraft, "relic-weapons-enchantment-glint-03.png");
+            glintSequenceCaptured = true;
+        }
+        if (!textureLightSelected && inWorldTicks >= 260) {
+            minecraft.player.getInventory().selected = 1;
+            textureLightSelected = true;
+        }
+        if (!textureLightCaptured && inWorldTicks >= 310) {
+            save(minecraft, "relic-weapons-texture-light.png");
+            textureLightCaptured = true;
+        }
+        if (!inventoryOpened && inWorldTicks >= 360) {
             minecraft.setScreen(new InventoryScreen(minecraft.player));
+            inventoryOpened = true;
         }
-        if (!secondCaptured && inWorldTicks >= 260) {
+        if (!inventoryCaptured && inWorldTicks >= 410) {
             save(minecraft, "relic-weapons-inventory.png");
-            secondCaptured = true;
+            inventoryCaptured = true;
         }
-        if ((secondCaptured && inWorldTicks >= 300) || inWorldTicks >= 700) {
+        if ((inventoryCaptured && inWorldTicks >= 450) || inWorldTicks >= 850) {
             minecraft.stop();
         }
     }
