@@ -50,7 +50,6 @@ final class ScreenshotServerHarness {
         level.setBlock(base.offset(1, 1, 0), Blocks.SMITHING_TABLE.defaultBlockState(), 3);
         ItemStack sword = new ItemStack(Items.DIAMOND_SWORD);
         RelicWeapons.applyEnchantmentGlow(sword, RelicWeapons.VANILLA_GLINT_COLOR);
-        RelicWeapons.applyTextureLight(sword, RelicWeapons.DEFAULT_RADIANCE_LEVEL);
         ItemStack axe = new ItemStack(Items.DIAMOND_AXE);
         RelicWeapons.applyTextureLight(axe, RelicWeapons.DEFAULT_RADIANCE_LEVEL);
         player.setGameMode(GameType.CREATIVE);

@@ -4,6 +4,7 @@
   "package": "dev.rinchan.relicweapons.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "ItemRendererMixin",
     "SodiumDynamicLightsItemLightSourcesMixin"
   ],
   "injectors": {
