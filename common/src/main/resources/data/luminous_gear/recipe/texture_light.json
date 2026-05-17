@@ -1,0 +1,8 @@
+{
+  "type": "luminous_gear:glow_smithing",
+  "template": {
+    "item": "luminous_gear:texture_light"
+  },
+  "glow_type": "texture_light",
+  "light_level": 2
+}
