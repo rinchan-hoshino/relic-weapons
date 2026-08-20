@@ -1,5 +1,3 @@
 {
-  "item.relic_weapons.enchantment_glow": "附魔光效",
-  "item.relic_weapons.texture_light": "材质光",
-  "modmenu.descriptionTranslation.relic_weapons": "通过锻造台为任意物品添加发光效果。"
+  "modmenu.descriptionTranslation.relic_weapons": "为任意物品提供数据驱动的彩色附魔光效、全亮材质与粒子特效。"
 }

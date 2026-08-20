@@ -1,5 +1,6 @@
 package dev.rinchan.relicweapons;
 
+import dev.rinchan.relicweapons.api.VisualEffects;
 import dev.rinchan.relicweapons.registry.RelicWeaponsRegistries;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
@@ -13,20 +14,19 @@ public final class RelicWeapons {
     }
 
     public static void applyEnchantmentGlow(ItemStack stack, int color) {
-        stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
         if (color >= 0) {
-            stack.set(RelicWeaponsRegistries.GLINT_COLOR.get(), color & 0xFFFFFF);
+            VisualEffects.setGlint(stack, color);
         } else {
-            stack.remove(RelicWeaponsRegistries.GLINT_COLOR.get());
+            stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+            stack.remove(RelicWeaponsRegistries.GLINT_COLOR);
         }
     }
 
     public static void applyTextureLight(ItemStack stack, int lightLevel) {
-        stack.set(RelicWeaponsRegistries.RADIANCE_LEVEL.get(), Math.max(0, Math.min(15, lightLevel)));
+        VisualEffects.setRadiance(stack, Math.max(0, Math.min(15, lightLevel)));
     }
 
     public static int radianceLevel(ItemStack stack) {
-        Integer level = stack.get(RelicWeaponsRegistries.RADIANCE_LEVEL.get());
-        return level == null ? 0 : Math.max(0, Math.min(15, level));
+        return Math.max(0, Math.min(15, VisualEffects.radianceLevel(stack)));
     }
 }

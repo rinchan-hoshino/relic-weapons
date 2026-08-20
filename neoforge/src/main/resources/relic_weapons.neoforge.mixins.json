@@ -4,10 +4,7 @@
   "package": "dev.rinchan.relicweapons.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "BufferSourceAccessor",
-    "ItemRendererMixin",
-    "OutlineBufferSourceAccessor",
-    "SodiumDynamicLightsItemLightSourcesMixin"
+    "HumanoidArmorLayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

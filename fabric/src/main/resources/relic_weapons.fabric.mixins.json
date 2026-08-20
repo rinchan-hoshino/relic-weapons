@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.rinchan.relicweapons.fabric.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "FabricHumanoidArmorLayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

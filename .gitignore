@@ -6,6 +6,8 @@ run/
 out/
 *.log
 *.hprof
+__pycache__/
+*.py[cod]
 .idea/
 *.iml
 .vscode/

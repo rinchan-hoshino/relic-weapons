@@ -4,8 +4,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.rinchan.relicweapons.RelicWeapons;
+import dev.rinchan.relicweapons.api.ParticleAnimation;
+import dev.rinchan.relicweapons.api.ParticleEffect;
+import dev.rinchan.relicweapons.api.VisualEffects;
 import dev.rinchan.relicweapons.registry.RelicWeaponsRegistries;
+import java.util.Optional;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -17,40 +23,72 @@ import net.minecraft.world.item.crafting.SmithingRecipe;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.level.Level;
 
-public record GlowSmithingRecipe(Ingredient template, Ingredient addition, GlowMode mode, int color, int lightLevel) implements SmithingRecipe {
+public record GlowSmithingRecipe(
+        Ingredient template,
+        Ingredient addition,
+        GlowMode mode,
+        int color,
+        int lightLevel,
+        Optional<ParticleEffect> particle) implements SmithingRecipe {
+    private static final ParticleAnimation DEFAULT_PARTICLE_ANIMATION = new ParticleAnimation(
+        ParticleAnimation.Shape.POINT,
+        4.0F,
+        0.25F,
+        ParticleAnimation.Direction.RANDOM,
+        0.0F,
+        0.0F);
+
+    public static final MapCodec<EffectSettings> EFFECT_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        GlowMode.CODEC.optionalFieldOf("glow_type", GlowMode.ENCHANTMENT).forGetter(EffectSettings::mode),
+        Codec.INT.optionalFieldOf("color", RelicWeapons.VANILLA_GLINT_COLOR).forGetter(EffectSettings::color),
+        Codec.INT.optionalFieldOf("light_level", RelicWeapons.DEFAULT_RADIANCE_LEVEL).forGetter(EffectSettings::lightLevel),
+        ParticleTypes.CODEC.optionalFieldOf("particle").forGetter(settings -> settings.particle().map(ParticleEffect::particle)),
+        ParticleAnimation.MAP_CODEC.forGetter(settings -> settings.particle().map(ParticleEffect::animation).orElse(DEFAULT_PARTICLE_ANIMATION))
+    ).apply(instance, EffectSettings::create));
+
     public static final MapCodec<GlowSmithingRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
         Ingredient.CODEC_NONEMPTY.fieldOf("template").forGetter(GlowSmithingRecipe::template),
         Ingredient.CODEC.optionalFieldOf("addition", Ingredient.EMPTY).forGetter(GlowSmithingRecipe::addition),
-        Codec.STRING.optionalFieldOf("glow_type", GlowMode.ENCHANTMENT.id()).xmap(GlowMode::fromId, GlowMode::id).forGetter(GlowSmithingRecipe::mode),
-        Codec.INT.optionalFieldOf("color", RelicWeapons.VANILLA_GLINT_COLOR).forGetter(GlowSmithingRecipe::color),
-        Codec.INT.optionalFieldOf("light_level", RelicWeapons.DEFAULT_RADIANCE_LEVEL).forGetter(GlowSmithingRecipe::lightLevel)
-    ).apply(instance, GlowSmithingRecipe::new));
+        EFFECT_CODEC.forGetter(GlowSmithingRecipe::settings)
+    ).apply(instance, (template, addition, settings) -> new GlowSmithingRecipe(
+            template, addition, settings.mode(), settings.color(), settings.lightLevel(), settings.particle())));
+
+    public GlowSmithingRecipe {
+        particle = particle == null ? Optional.empty() : particle;
+        if (mode == GlowMode.PARTICLE && particle.isEmpty()) {
+            throw new IllegalArgumentException("particle glow recipes require a particle specification");
+        }
+    }
+
+    private EffectSettings settings() {
+        return new EffectSettings(mode, color, lightLevel, particle);
+    }
 
     @Override
     public boolean matches(SmithingRecipeInput input, Level level) {
-        return template.test(input.template()) && matchesAddition(input.addition()) && isValidBase(input.base());
+        return template.test(input.template()) && matchesAddition(input.addition()) && !input.base().isEmpty();
     }
 
     @Override
     public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
         ItemStack result = input.base().copyWithCount(1);
-        if (mode == GlowMode.TEXTURE_LIGHT) {
-            RelicWeapons.applyTextureLight(result, lightLevel);
-        } else {
-            RelicWeapons.applyEnchantmentGlow(result, color);
-        }
+        apply(result);
         return result;
     }
 
     @Override
     public ItemStack getResultItem(HolderLookup.Provider registries) {
         ItemStack stack = new ItemStack(Items.IRON_SWORD);
-        if (mode == GlowMode.TEXTURE_LIGHT) {
-            RelicWeapons.applyTextureLight(stack, lightLevel);
-        } else {
-            RelicWeapons.applyEnchantmentGlow(stack, color);
-        }
+        apply(stack);
         return stack;
+    }
+
+    private void apply(ItemStack stack) {
+        switch (mode) {
+            case ENCHANTMENT -> VisualEffects.setGlint(stack, color);
+            case TEXTURE_LIGHT -> VisualEffects.setRadiance(stack, lightLevel);
+            case PARTICLE -> VisualEffects.setParticle(stack, particle.orElseThrow());
+        }
     }
 
     @Override
@@ -60,7 +98,7 @@ public record GlowSmithingRecipe(Ingredient template, Ingredient addition, GlowM
 
     @Override
     public boolean isBaseIngredient(ItemStack stack) {
-        return isValidBase(stack);
+        return !stack.isEmpty();
     }
 
     @Override
@@ -70,22 +108,27 @@ public record GlowSmithingRecipe(Ingredient template, Ingredient addition, GlowM
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return RelicWeaponsRegistries.GLOW_SMITHING.get();
+        return RelicWeaponsRegistries.GLOW_SMITHING;
     }
 
     @Override
     public boolean isIncomplete() {
-        return template.hasNoItems() || (!addition.isEmpty() && addition.hasNoItems());
+        return template.getItems().length == 0 || (!addition.isEmpty() && addition.getItems().length == 0);
     }
 
     private boolean matchesAddition(ItemStack stack) {
         return addition.isEmpty() ? stack.isEmpty() : addition.test(stack);
     }
 
-    private boolean isValidBase(ItemStack stack) {
-        return !stack.isEmpty()
-            && !stack.is(RelicWeaponsRegistries.ENCHANTMENT_GLOW.get())
-            && !stack.is(RelicWeaponsRegistries.TEXTURE_LIGHT.get());
+    public record EffectSettings(GlowMode mode, int color, int lightLevel, Optional<ParticleEffect> particle) {
+        private static EffectSettings create(
+                GlowMode mode,
+                int color,
+                int lightLevel,
+                Optional<ParticleOptions> options,
+                ParticleAnimation animation) {
+            return new EffectSettings(mode, color, lightLevel, options.map(value -> new ParticleEffect(value, animation)));
+        }
     }
 
     public static final class Serializer implements RecipeSerializer<GlowSmithingRecipe> {
@@ -97,7 +140,8 @@ public record GlowSmithingRecipe(Ingredient template, Ingredient addition, GlowM
                 GlowMode mode = GlowMode.fromId(ByteBufCodecs.STRING_UTF8.decode(buffer));
                 int color = ByteBufCodecs.VAR_INT.decode(buffer);
                 int lightLevel = ByteBufCodecs.VAR_INT.decode(buffer);
-                return new GlowSmithingRecipe(template, addition, mode, color, lightLevel);
+                Optional<ParticleEffect> particle = ByteBufCodecs.optional(ParticleEffect.STREAM_CODEC).decode(buffer);
+                return new GlowSmithingRecipe(template, addition, mode, color, lightLevel, particle);
             }
 
             @Override
@@ -107,6 +151,7 @@ public record GlowSmithingRecipe(Ingredient template, Ingredient addition, GlowM
                 ByteBufCodecs.STRING_UTF8.encode(buffer, recipe.mode.id());
                 ByteBufCodecs.VAR_INT.encode(buffer, recipe.color);
                 ByteBufCodecs.VAR_INT.encode(buffer, recipe.lightLevel);
+                ByteBufCodecs.optional(ParticleEffect.STREAM_CODEC).encode(buffer, recipe.particle);
             }
         };
 

@@ -1,25 +1,31 @@
 package dev.rinchan.relicweapons.recipe;
 
-public enum GlowMode {
-    ENCHANTMENT("enchantment"),
-    TEXTURE_LIGHT("texture_light");
+import com.mojang.serialization.Codec;
+import java.util.Locale;
+import net.minecraft.util.StringRepresentable;
 
-    private final String id;
+public enum GlowMode implements StringRepresentable {
+    ENCHANTMENT,
+    TEXTURE_LIGHT,
+    PARTICLE;
 
-    GlowMode(String id) {
-        this.id = id;
-    }
+    public static final Codec<GlowMode> CODEC = StringRepresentable.fromEnum(GlowMode::values);
 
     public String id() {
-        return id;
+        return getSerializedName();
+    }
+
+    @Override
+    public String getSerializedName() {
+        return name().toLowerCase(Locale.ROOT);
     }
 
     public static GlowMode fromId(String id) {
         for (GlowMode mode : values()) {
-            if (mode.id.equals(id)) {
+            if (mode.id().equals(id)) {
                 return mode;
             }
         }
-        return ENCHANTMENT;
+        throw new IllegalArgumentException("Unknown glow type " + id);
     }
 }
