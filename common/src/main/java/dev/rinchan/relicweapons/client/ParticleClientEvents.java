@@ -9,6 +9,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -50,9 +51,18 @@ public final class ParticleClientEvents {
         int spawned = 0;
         Vec3 forward = entity.getLookAngle();
         Vec3 motion = entity.getDeltaMovement();
-        Vec3 handAnchor = entity.position().add(0.0, entity.getBbHeight() * 0.67, 0.0).add(forward.scale(0.35));
-        spawned += spawnForStack(level, entity.getMainHandItem(), handAnchor, forward, motion, budget - spawned);
-        spawned += spawnForStack(level, entity.getOffhandItem(), handAnchor, forward, motion, budget - spawned);
+        HumanoidArm mainArm = entity.getMainArm();
+        HumanoidArm offArm = mainArm.getOpposite();
+        boolean firstPersonPlayer = entity == Minecraft.getInstance().player
+            && Minecraft.getInstance().options.getCameraType().isFirstPerson();
+        Vec3 mainHandAnchor = firstPersonPlayer
+            ? HandParticleAnchor.firstPerson(entity.getEyePosition(), forward, mainArm)
+            : HandParticleAnchor.thirdPerson(entity.position(), entity.getBbHeight(), forward, entity.yBodyRot, mainArm);
+        Vec3 offHandAnchor = firstPersonPlayer
+            ? HandParticleAnchor.firstPerson(entity.getEyePosition(), forward, offArm)
+            : HandParticleAnchor.thirdPerson(entity.position(), entity.getBbHeight(), forward, entity.yBodyRot, offArm);
+        spawned += spawnForStack(level, entity.getMainHandItem(), mainHandAnchor, forward, motion, budget - spawned);
+        spawned += spawnForStack(level, entity.getOffhandItem(), offHandAnchor, forward, motion, budget - spawned);
 
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR || spawned >= budget) {
