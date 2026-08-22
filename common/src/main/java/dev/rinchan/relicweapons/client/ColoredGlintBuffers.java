@@ -1,16 +1,11 @@
 package dev.rinchan.relicweapons.client;
 
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
-import dev.rinchan.relicweapons.mixin.BufferSourceAccessor;
-import dev.rinchan.relicweapons.mixin.OutlineBufferSourceAccessor;
-import java.util.SequencedMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.OutlineBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 
@@ -53,27 +48,6 @@ public final class ColoredGlintBuffers {
     }
 
     private static VertexConsumer coloredBuffer(MultiBufferSource buffers, RenderType type, int rgb) {
-        ensureFixedBuffer(buffers, type);
         return new ColoredVertexConsumer(buffers.getBuffer(type), rgb & 0xFFFFFF);
-    }
-
-    private static void ensureFixedBuffer(MultiBufferSource buffers, RenderType type) {
-        MultiBufferSource.BufferSource source = unwrap(buffers);
-        if (source == null) {
-            throw new IllegalStateException(
-                "Colored glint requires Minecraft's fixed BufferSource, got " + buffers.getClass().getName());
-        }
-        SequencedMap<RenderType, ByteBufferBuilder> fixed = ((BufferSourceAccessor) source).relicWeapons$fixedBuffers();
-        fixed.computeIfAbsent(type, key -> new ByteBufferBuilder(key.bufferSize()));
-    }
-
-    private static MultiBufferSource.BufferSource unwrap(MultiBufferSource buffers) {
-        if (buffers instanceof MultiBufferSource.BufferSource source) {
-            return source;
-        }
-        if (buffers instanceof OutlineBufferSource outline) {
-            return ((OutlineBufferSourceAccessor) outline).relicWeapons$bufferSource();
-        }
-        return null;
     }
 }

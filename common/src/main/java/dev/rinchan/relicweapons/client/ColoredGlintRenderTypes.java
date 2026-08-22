@@ -2,6 +2,7 @@ package dev.rinchan.relicweapons.client;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import java.util.List;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -13,6 +14,7 @@ public final class ColoredGlintRenderTypes {
     private static final RenderType ENTITY = create("entity", true, true, false);
     private static final RenderType ENTITY_DIRECT = create("entity_direct", true, false, false);
     private static final RenderType ARMOR = create("armor", true, false, true);
+    private static final List<RenderType> ALL = List.of(ITEM, ITEM_TRANSLUCENT, ENTITY, ENTITY_DIRECT, ARMOR);
 
     private ColoredGlintRenderTypes() {
     }
@@ -35,6 +37,10 @@ public final class ColoredGlintRenderTypes {
 
     public static RenderType armor() {
         return ARMOR;
+    }
+
+    public static List<RenderType> all() {
+        return ALL;
     }
 
     private static RenderType create(String id, boolean entityTexture, boolean itemTarget, boolean armor) {

@@ -6,13 +6,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class RelicWeaponsReleaseContractTests(unittest.TestCase):
-    def test_release_is_breaking_content_free_030_api(self):
+    def test_release_keeps_the_content_free_public_api(self):
         props = dict(
             line.split("=", 1)
             for line in (ROOT / "gradle.properties").read_text().splitlines()
             if "=" in line and not line.lstrip().startswith("#")
         )
-        self.assertEqual("0.3.0", props["mod_version"])
+        self.assertEqual("0.3.3", props["mod_version"])
         self.assertEqual("GPL-3.0-only", props["mod_license"])
 
         registry = (ROOT / "common/src/main/java/dev/rinchan/relicweapons/registry/RelicWeaponsRegistries.java").read_text()
@@ -44,6 +44,8 @@ class RelicWeaponsReleaseContractTests(unittest.TestCase):
         self.assertTrue(mixins["required"])
         self.assertEqual(1, mixins["injectors"]["defaultRequire"])
         self.assertIn("ItemRendererMixin", mixins["client"])
+        self.assertNotIn("BufferSourceAccessor", mixins["client"])
+        self.assertNotIn("OutlineBufferSourceAccessor", mixins["client"])
         item = (ROOT / "common/src/main/java/dev/rinchan/relicweapons/mixin/ItemRendererMixin.java").read_text()
         neo_armor = (ROOT / "neoforge/src/main/java/dev/rinchan/relicweapons/mixin/HumanoidArmorLayerMixin.java").read_text()
         fabric_armor = (ROOT / "fabric/src/main/java/dev/rinchan/relicweapons/fabric/mixin/FabricHumanoidArmorLayerMixin.java").read_text()
@@ -59,10 +61,19 @@ class RelicWeaponsReleaseContractTests(unittest.TestCase):
         vertex = (ROOT / "common/src/main/resources/assets/relic_weapons/shaders/core/colored_glint.vsh").read_text()
         self.assertIn("RelicShaders::coloredGlint", render_types)
         self.assertIn("POSITION_TEX_COLOR", render_types)
-        self.assertIn("computeIfAbsent", buffers)
+        self.assertNotIn("ensureFixedBuffer", buffers)
+        self.assertNotIn("computeIfAbsent", buffers)
+        neo_client = (ROOT / "neoforge/src/main/java/dev/rinchan/relicweapons/neoforge/RelicWeaponsNeoForge.java").read_text()
+        fabric_buffers = (ROOT / "fabric/src/main/java/dev/rinchan/relicweapons/fabric/mixin/FabricRenderBuffersMixin.java").read_text()
+        fabric_mixins = json.loads((ROOT / "fabric/src/main/resources/relic_weapons.fabric.mixins.json").read_text())
+        self.assertIn("RegisterRenderBuffersEvent", neo_client)
+        self.assertIn("FabricRenderBuffersMixin", fabric_mixins["client"])
+        self.assertIn("List.of(ITEM, ITEM_TRANSLUCENT, ENTITY, ENTITY_DIRECT, ARMOR)", render_types)
+        self.assertIn("ColoredGlintRenderTypes.all()", neo_client)
+        self.assertIn("ColoredGlintRenderTypes.all()", fabric_buffers)
         self.assertIn("delegate.setColor(red, green, blue, alpha)", vertex_consumer)
         self.assertIn("vertexColor = Color", vertex)
-        self.assertIn("vertexColor.rgb * ColorModulator.rgb * intensity", fragment)
+        self.assertIn("visibleTint * ColorModulator.rgb * visibleIntensity", fragment)
 
     def test_fabric_and_neoforge_load_the_same_public_effect_implementation(self):
         settings = (ROOT / "settings.gradle").read_text()

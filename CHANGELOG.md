@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.3
+
+### Fixed
+
+- Register colored-glint buffers when the render system is created instead of mutating its fixed buffer map while drawing an item. This prevents crashes with immutable maps and wrapped buffer sources such as Iris on both NeoForge and Fabric.
+
 ## 0.3.0
 
 ### Breaking
